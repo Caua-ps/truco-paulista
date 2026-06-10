@@ -1,0 +1,23 @@
+node_modules/
+dist/
+.next/
+build/
+coverage/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+# Prisma
+apps/api/prisma/migrations/dev/
+
+# Ferramentas locais
+.claude/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

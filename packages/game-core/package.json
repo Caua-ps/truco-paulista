@@ -1,0 +1,16 @@
+{
+  "name": "@truco/game-core",
+  "version": "0.1.0",
+  "description": "Motor de regras do Truco Paulista — TypeScript puro, sem dependências, compartilhável entre Web, servidor e React Native",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

@@ -1,0 +1,413 @@
+// Modelagem do banco — Truco Paulista
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Usuários e autenticação
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  username        String    @unique
+  displayName     String
+  /// Nulo para contas criadas só via Google OAuth.
+  passwordHash    String?
+  googleId        String?   @unique
+  emailVerifiedAt DateTime?
+  avatarUrl       String?
+  role            Role      @default(USER)
+
+  // Progressão
+  xp     Int @default(0)
+  level  Int @default(1)
+  /// Rating ranqueado corrente (Elo simplificado).
+  rating Int @default(1000)
+
+  // Monetização (nunca concede vantagem competitiva)
+  premiumUntil    DateTime?
+  premiumLifetime Boolean   @default(false)
+  coins           Int       @default(0)
+
+  // Moderação
+  bannedUntil DateTime?
+  banReason   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens    RefreshToken[]
+  authTokens       AuthToken[]
+  matchPlayers     MatchPlayer[]
+  sentFriendships  Friendship[]    @relation("requester")
+  recvFriendships  Friendship[]    @relation("addressee")
+  seasonRatings    SeasonRating[]
+  cosmetics        UserCosmetic[]
+  subscriptions    Subscription[]
+  reportsMade      Report[]        @relation("reporter")
+  reportsReceived  Report[]        @relation("target")
+  achievements     UserAchievement[]
+  missions         UserMission[]
+  chatMessages     ChatMessage[]
+  auditLogs        AdminAuditLog[]
+
+  @@index([rating])
+  @@index([xp])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Hash SHA-256 do token — o token em claro nunca é persistido.
+  tokenHash String   @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model AuthToken {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  @@index([userId, type])
+}
+
+// ---------------------------------------------------------------------------
+// Social
+// ---------------------------------------------------------------------------
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  requester   User             @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId String
+  addressee   User             @relation("addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Partidas
+// ---------------------------------------------------------------------------
+
+enum MatchMode {
+  ONE_V_ONE
+  TWO_V_TWO
+}
+
+enum MatchStatus {
+  IN_PROGRESS
+  FINISHED
+  ABANDONED
+}
+
+model Match {
+  id         String      @id @default(uuid())
+  mode       MatchMode
+  ranked     Boolean     @default(false)
+  status     MatchStatus @default(IN_PROGRESS)
+  winnerTeam Int?
+  scoreTeam0 Int         @default(0)
+  scoreTeam1 Int         @default(0)
+  /// Semente do RNG para reprodutibilidade/replay e auditoria anti-fraude.
+  rngSeed    String?
+  /// Snapshot do GameState para retomada após restart do servidor.
+  stateSnapshot Json?
+  /// Sala em memória associada (para restauração).
+  roomId   String? @unique
+  roomCode String?
+  startedAt  DateTime    @default(now())
+  endedAt    DateTime?
+
+  players MatchPlayer[]
+  events  MatchEvent[]
+  reports Report[]
+
+  @@index([status, startedAt])
+}
+
+model MatchPlayer {
+  id          String  @id @default(uuid())
+  matchId     String
+  match       Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User    @relation(fields: [userId], references: [id])
+  seat        Int
+  team        Int
+  xpEarned    Int     @default(0)
+  ratingDelta Int     @default(0)
+  /// Abandonou/caiu e não voltou (derrota por W.O.).
+  forfeited   Boolean @default(false)
+
+  @@unique([matchId, seat])
+  @@index([userId])
+}
+
+/// Log de eventos da partida — alimenta replay e auditoria anti-trapaça.
+model MatchEvent {
+  id        BigInt   @id @default(autoincrement())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  seq       Int
+  type      String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, seq])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  matchId   String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  /// Mensagem ocultada por moderação.
+  hidden    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([matchId])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Temporadas e ranking
+// ---------------------------------------------------------------------------
+
+model Season {
+  id       String   @id @default(uuid())
+  name     String
+  startsAt DateTime
+  endsAt   DateTime
+
+  ratings SeasonRating[]
+
+  @@index([startsAt, endsAt])
+}
+
+model SeasonRating {
+  id       String @id @default(uuid())
+  seasonId String
+  season   Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating   Int    @default(1000)
+  wins     Int    @default(0)
+  losses   Int    @default(0)
+
+  @@unique([seasonId, userId])
+  @@index([seasonId, rating])
+}
+
+// ---------------------------------------------------------------------------
+// Loja cosmética e Premium (sem vantagem competitiva)
+// ---------------------------------------------------------------------------
+
+enum CosmeticType {
+  AVATAR
+  PROFILE_FRAME
+  TABLE_THEME
+  CARD_BACK
+  EMOJI_PACK
+  VISUAL_EFFECT
+}
+
+enum Rarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+model CosmeticItem {
+  id          String       @id @default(uuid())
+  type        CosmeticType
+  name        String
+  description String?
+  priceCoins  Int
+  rarity      Rarity       @default(COMMON)
+  assetUrl    String?
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+
+  owners UserCosmetic[]
+}
+
+model UserCosmetic {
+  id       String       @id @default(uuid())
+  userId   String
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemId   String
+  item     CosmeticItem @relation(fields: [itemId], references: [id])
+  equipped Boolean      @default(false)
+  boughtAt DateTime     @default(now())
+
+  @@unique([userId, itemId])
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  YEARLY
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  EXPIRED
+}
+
+model Subscription {
+  id               String             @id @default(uuid())
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan             SubscriptionPlan
+  status           SubscriptionStatus @default(ACTIVE)
+  /// Provedor de pagamento (ex.: stripe, mercadopago) e id externo da assinatura.
+  provider         String
+  externalId       String?
+  currentPeriodEnd DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([userId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Conquistas e missões
+// ---------------------------------------------------------------------------
+
+model Achievement {
+  id          String @id @default(uuid())
+  code        String @unique
+  name        String
+  description String
+  xpReward    Int    @default(0)
+
+  users UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+enum MissionPeriod {
+  DAILY
+  WEEKLY
+}
+
+model Mission {
+  id         String        @id @default(uuid())
+  code       String        @unique
+  name       String
+  period     MissionPeriod
+  /// Meta numérica (ex.: vencer 3 partidas).
+  target     Int
+  xpReward   Int           @default(0)
+  coinReward Int           @default(0)
+  active     Boolean       @default(true)
+
+  users UserMission[]
+}
+
+model UserMission {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  missionId   String
+  mission     Mission   @relation(fields: [missionId], references: [id])
+  progress    Int       @default(0)
+  completedAt DateTime?
+  /// Janela da missão (reinicia diariamente/semanalmente).
+  windowStart DateTime
+
+  @@unique([userId, missionId, windowStart])
+}
+
+// ---------------------------------------------------------------------------
+// Moderação e administração
+// ---------------------------------------------------------------------------
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id         String       @id @default(uuid())
+  reporterId String
+  reporter   User         @relation("reporter", fields: [reporterId], references: [id])
+  targetId   String
+  target     User         @relation("target", fields: [targetId], references: [id])
+  matchId    String?
+  match      Match?       @relation(fields: [matchId], references: [id])
+  reason     String
+  details    String?
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+model AdminAuditLog {
+  id        String   @id @default(uuid())
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id])
+  action    String
+  targetRef String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([adminId, createdAt])
+}

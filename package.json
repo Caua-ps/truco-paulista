@@ -1,0 +1,22 @@
+{
+  "name": "truco-paulista",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma de Truco Paulista online multiplayer — Web (Next.js) + API (NestJS) + motor de jogo compartilhado",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/api & npm run dev --workspace=apps/web",
+    "build": "npm run build --workspace=packages/game-core && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
+    "test": "npm run test --workspaces --if-present",
+    "test:core": "npm run test --workspace=packages/game-core",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "db:studio": "npm run prisma:studio --workspace=apps/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

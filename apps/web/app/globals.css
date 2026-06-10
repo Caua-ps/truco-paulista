@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-felt-darker text-zinc-100 antialiased;
+  background:
+    radial-gradient(1100px 500px at 50% -120px, rgba(212, 169, 66, 0.07), transparent 70%),
+    radial-gradient(ellipse at center, #0e4a28 0%, #0a3a1f 55%, #062613 100%);
+  min-height: 100dvh;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* Filete dourado para separar seções com elegância */
+  .gold-rule {
+    @apply h-px w-full border-0 bg-gradient-to-r from-transparent via-gold/40 to-transparent;
+  }
+
+  .btn-primary {
+    @apply btn bg-gradient-to-b from-gold-light to-gold text-zinc-900 shadow-[0_4px_14px_rgba(212,169,66,0.3)]
+      hover:brightness-110 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply btn border border-white/15 bg-white/[0.06] text-zinc-100 backdrop-blur
+      hover:border-white/30 hover:bg-white/10 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply btn bg-gradient-to-b from-red-500 to-red-700 text-white shadow-[0_4px_14px_rgba(220,38,38,0.4)]
+      hover:brightness-110 active:scale-95;
+  }
+
+  /* Botão de truco: gradiente quente com brilho varrendo */
+  .btn-truco {
+    @apply btn relative overflow-hidden bg-gradient-to-b from-red-500 via-red-600 to-red-800 px-8 py-2.5
+      font-display text-xl tracking-wider text-white shadow-[0_6px_24px_rgba(220,38,38,0.5)]
+      hover:brightness-110 active:scale-95 sm:px-10 sm:text-2xl;
+  }
+  .btn-truco::after {
+    content: '';
+    @apply absolute inset-0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+    background-size: 200% 100%;
+    animation: shimmer 2.2s linear infinite;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-white/15 bg-black/40 px-4 py-2.5 text-zinc-100
+      placeholder-zinc-500 outline-none backdrop-blur transition focus:border-gold focus:shadow-glow;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-white/10 bg-black/30 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.3)] backdrop-blur;
+  }
+
+  .glass {
+    @apply rounded-2xl border border-white/10 bg-black/40 backdrop-blur-md;
+  }
+
+  /* Feltro da mesa de jogo */
+  .table-felt {
+    background:
+      radial-gradient(ellipse at 50% 32%, #2f9458 0%, #1d7242 42%, #145632 72%, #0e4327 100%);
+  }
+}
