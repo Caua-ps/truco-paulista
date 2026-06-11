@@ -21,6 +21,7 @@ import {
   viewFor,
 } from '@truco/game-core';
 import { Server, Socket } from 'socket.io';
+import { FriendsService } from '../friends/friends.service';
 import { RedisService } from '../redis/redis.service';
 import { GamePersistenceService } from './game-persistence.service';
 import { MatchmakingService } from './matchmaking.service';
@@ -78,6 +79,7 @@ export class GameGateway
     private readonly matchmaking: MatchmakingService,
     private readonly persistence: GamePersistenceService,
     private readonly redis: RedisService,
+    private readonly friends: FriendsService,
   ) {
     this.matchmaking.setMatchFoundHandler((mode, ranked, userIds) =>
       this.onMatchFound(mode, ranked, userIds),
@@ -554,6 +556,85 @@ export class GameGateway
     return { ok: true };
   }
 
+  // ---------------------------------------------------------------------------
+  // Mensagens diretas entre amigos
+  // ---------------------------------------------------------------------------
+
+  @SubscribeMessage('dm:send')
+  async dmSend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: { toUserId?: string; text?: string },
+  ) {
+    const user = this.requireUser(socket);
+    const text = body?.text?.trim();
+    if (!body?.toUserId || !text) return { ok: false, error: 'Mensagem vazia' };
+    if (text.length > 500) return { ok: false, error: 'Mensagem muito longa' };
+    if (!this.allowChat(user.id)) return { ok: false, error: 'Calma! Aguarde para enviar de novo.' };
+
+    try {
+      const message = await this.friends.saveDirectMessage(user.id, body.toUserId, text);
+      const payload = { ...message, fromUsername: user.username };
+      // Entrega para todas as abas do destinatário e ecoa para as do remetente.
+      for (const s of this.socketsOfUser(body.toUserId)) s.emit('dm:message', payload);
+      for (const s of this.socketsOfUser(user.id)) s.emit('dm:message', payload);
+      return { ok: true, message: payload };
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'Falha ao enviar' };
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Convite direto: chama o amigo online para a sua mesa
+  // ---------------------------------------------------------------------------
+
+  @SubscribeMessage('invite:send')
+  async inviteSend(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: { toUserId?: string },
+  ) {
+    const user = this.requireUser(socket);
+    if (!body?.toUserId) return { ok: false, error: 'Destinatário inválido' };
+
+    const room = this.rooms.findByUser(user.id);
+    if (!room) return { ok: false, error: 'Crie uma mesa antes de convidar' };
+    if (room.state) return { ok: false, error: 'A partida já começou' };
+    if (room.players.length >= seatsFor(room.mode)) return { ok: false, error: 'Mesa cheia' };
+    if (room.players.some((p) => p.userId === body.toUserId)) {
+      return { ok: false, error: 'Este amigo já está na mesa' };
+    }
+    if (!(await this.friends.areFriends(user.id, body.toUserId))) {
+      return { ok: false, error: 'Vocês não são amigos' };
+    }
+
+    const targets = this.socketsOfUser(body.toUserId);
+    if (targets.length === 0) return { ok: false, error: 'Amigo offline no momento' };
+
+    const profile = await this.persistence.getUserSummary(user.id);
+    for (const s of targets) {
+      s.emit('invite:received', {
+        fromUserId: user.id,
+        fromName: profile.displayName,
+        code: room.code,
+        mode: room.mode,
+        ranked: room.ranked,
+      });
+    }
+    return { ok: true, code: room.code };
+  }
+
+  @SubscribeMessage('invite:decline')
+  inviteDecline(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body: { toUserId?: string },
+  ) {
+    const user = this.requireUser(socket);
+    if (!body?.toUserId) return { ok: false };
+    for (const s of this.socketsOfUser(body.toUserId)) {
+      s.emit('invite:declined', { byUserId: user.id, byUsername: user.username });
+    }
+    return { ok: true };
+  }
+
   /** Heartbeat de presença (cliente envia a cada 30s). */
   @SubscribeMessage('presence:ping')
   async presencePing(@ConnectedSocket() socket: Socket) {
@@ -644,13 +725,18 @@ export class GameGateway
   }
 
   private findSocketByUser(userId: string): Socket | null {
+    return this.socketsOfUser(userId)[0] ?? null;
+  }
+
+  /** Todos os sockets conectados de um usuário (multi-aba). */
+  private socketsOfUser(userId: string): Socket[] {
+    const result: Socket[] = [];
+    const sockets = this.server.sockets as unknown as Map<string, Socket>;
     for (const [socketId, user] of this.socketUsers) {
-      if (user.id === userId) {
-        const sockets = (this.server.sockets as unknown as Map<string, Socket>);
-        const s = sockets?.get?.(socketId);
-        if (s) return s;
-      }
+      if (user.id !== userId) continue;
+      const s = sockets?.get?.(socketId);
+      if (s) result.push(s);
     }
-    return null;
+    return result;
   }
 }

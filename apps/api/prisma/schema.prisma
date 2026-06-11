@@ -52,6 +52,8 @@ model User {
 
   refreshTokens    RefreshToken[]
   authTokens       AuthToken[]
+  dmsSent          DirectMessage[] @relation("dmSender")
+  dmsReceived      DirectMessage[] @relation("dmRecipient")
   matchPlayers     MatchPlayer[]
   sentFriendships  Friendship[]    @relation("requester")
   recvFriendships  Friendship[]    @relation("addressee")
@@ -124,6 +126,21 @@ model Friendship {
 
   @@unique([requesterId, addresseeId])
   @@index([addresseeId, status])
+}
+
+/// Mensagem direta entre amigos (chat fora da partida).
+model DirectMessage {
+  id          String    @id @default(uuid())
+  senderId    String
+  sender      User      @relation("dmSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User      @relation("dmRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  content     String
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([senderId, recipientId, createdAt])
+  @@index([recipientId, readAt])
 }
 
 // ---------------------------------------------------------------------------
