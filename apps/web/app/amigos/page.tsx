@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { IconSend } from '@/components/icons';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { DirectMessage, useSocial } from '@/lib/social-store';
@@ -240,10 +241,18 @@ export default function AmigosPage() {
                         <span className="text-sm text-zinc-500">@{r.requester.username}</span>
                       </span>
                       <span className="flex gap-1.5">
-                        <button onClick={() => respond(r.id, true)} className="btn-primary px-3 py-1 text-sm">
+                        <button
+                          onClick={() => respond(r.id, true)}
+                          className="btn-primary h-10 w-11 px-0 text-sm"
+                          aria-label={`Aceitar convite de ${r.requester.displayName}`}
+                        >
                           ✓
                         </button>
-                        <button onClick={() => respond(r.id, false)} className="btn-secondary px-3 py-1 text-sm">
+                        <button
+                          onClick={() => respond(r.id, false)}
+                          className="btn-secondary h-10 w-11 px-0 text-sm"
+                          aria-label={`Recusar convite de ${r.requester.displayName}`}
+                        >
                           ✕
                         </button>
                       </span>
@@ -367,13 +376,16 @@ export default function AmigosPage() {
                 {/* Caixa de envio */}
                 <form onSubmit={sendDm} className="flex gap-2 border-t border-white/10 p-3">
                   <input
-                    className="input flex-1 py-2"
+                    className="input min-h-11 flex-1 py-2"
                     placeholder={`Mensagem para ${selected.displayName}…`}
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     maxLength={500}
+                    aria-label={`Mensagem para ${selected.displayName}`}
                   />
-                  <button className="btn-primary px-4 py-2">➤</button>
+                  <button className="btn-primary min-h-11 px-4" aria-label="Enviar mensagem">
+                    <IconSend className="h-4 w-4" />
+                  </button>
                 </form>
               </div>
             )}

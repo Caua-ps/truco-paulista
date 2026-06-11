@@ -14,6 +14,24 @@ body {
   min-height: 100dvh;
 }
 
+/* Navegação por teclado: anel dourado visível em qualquer elemento focável */
+:focus-visible {
+  outline: 2px solid #d4a942;
+  outline-offset: 2px;
+}
+
+/* Respeita quem prefere menos movimento: animações pulam direto ao estado final */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 font-semibold transition

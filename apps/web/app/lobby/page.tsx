@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { IconLock, IconTicket, IconTrophy, IconZap } from '@/components/icons';
 import { useAuth } from '@/lib/auth-store';
 import { getGameSocket } from '@/lib/socket';
 import type { GameMode } from '@truco/game-core';
@@ -90,7 +91,9 @@ export default function LobbyPage() {
           <>
             <section className="mt-8 grid gap-4 sm:grid-cols-2">
               <div className="panel">
-                <h2 className="font-display text-2xl text-gold">⚡ Partida rápida</h2>
+                <h2 className="flex items-center gap-2.5 font-display text-2xl text-gold">
+                  <IconZap className="h-5 w-5" /> Partida rápida
+                </h2>
                 <p className="mt-1 text-sm text-zinc-400">Matchmaking automático, sem rating.</p>
                 <div className="mt-4 flex gap-3">
                   <button onClick={() => enterQueue('1v1', false)} className="btn-primary flex-1">
@@ -103,7 +106,9 @@ export default function LobbyPage() {
               </div>
 
               <div className="panel">
-                <h2 className="font-display text-2xl text-gold">🏆 Ranqueada</h2>
+                <h2 className="flex items-center gap-2.5 font-display text-2xl text-gold">
+                  <IconTrophy className="h-5 w-5" /> Ranqueada
+                </h2>
                 <p className="mt-1 text-sm text-zinc-400">
                   Vale rating ({user?.rating ?? 1000}). Pareamento por habilidade.
                 </p>
@@ -120,7 +125,9 @@ export default function LobbyPage() {
 
             <section className="mt-4 grid gap-4 sm:grid-cols-2">
               <div className="panel">
-                <h2 className="font-display text-2xl text-gold">🔒 Sala privada</h2>
+                <h2 className="flex items-center gap-2.5 font-display text-2xl text-gold">
+                  <IconLock className="h-5 w-5" /> Sala privada
+                </h2>
                 <p className="mt-1 text-sm text-zinc-400">Crie e convide amigos pelo código.</p>
                 <div className="mt-4 flex gap-3">
                   <button onClick={() => createRoom('1v1')} className="btn-secondary flex-1">
@@ -133,7 +140,9 @@ export default function LobbyPage() {
               </div>
 
               <div className="panel">
-                <h2 className="font-display text-2xl text-gold">🎟️ Entrar com código</h2>
+                <h2 className="flex items-center gap-2.5 font-display text-2xl text-gold">
+                  <IconTicket className="h-5 w-5" /> Entrar com código
+                </h2>
                 <form onSubmit={joinRoom} className="mt-4 flex gap-3">
                   <input
                     className="input flex-1 uppercase tracking-widest"
