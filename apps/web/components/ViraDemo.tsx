@@ -24,24 +24,14 @@ function randomVira(current: Rank): Card {
   return { rank, suit };
 }
 
-function DemoCard({
-  rank,
-  suit,
-  zap = false,
-  className = '',
-}: {
-  rank: string;
-  suit: Suit;
-  zap?: boolean;
-  className?: string;
-}) {
+function DemoCard({ rank, suit, zap = false }: { rank: string; suit: Suit; zap?: boolean }) {
   const red = RED_SUITS.has(suit);
   return (
     <div
       className={`relative flex h-40 w-28 flex-col items-center justify-center rounded-2xl border border-zinc-200
         bg-gradient-to-br from-white via-zinc-50 to-zinc-200 font-display shadow-[0_20px_50px_rgba(0,0,0,0.55)]
         sm:h-52 sm:w-36 ${red ? 'text-red-600' : 'text-zinc-900'}
-        ${zap ? 'ring-1 ring-gold shadow-glow' : ''} ${className}`}
+        ${zap ? 'ring-1 ring-gold shadow-glow' : ''}`}
     >
       <span className="absolute left-2.5 top-1.5 text-xl font-bold sm:text-2xl">{rank}</span>
       <span className="text-6xl drop-shadow-sm sm:text-7xl">{SUIT_SYMBOL[suit]}</span>
@@ -49,6 +39,13 @@ function DemoCard({
     </div>
   );
 }
+
+/** Posição de cada manilha no leque: rotação fixa, animação no wrapper interno. */
+const FAN_SLOTS: { suit: Suit; pos: string; rot: string; z: string; delay: string }[] = [
+  { suit: 'espadas', pos: 'left-0 top-4', rot: '-rotate-12', z: 'z-10', delay: '0ms' },
+  { suit: 'copas', pos: 'left-[30%] top-0', rot: 'rotate-0', z: 'z-20', delay: '60ms' },
+  { suit: 'paus', pos: 'left-[60%] top-4', rot: 'rotate-12', z: 'z-30', delay: '120ms' },
+];
 
 export function ViraDemo() {
   const [vira, setVira] = useState<Card>({ rank: '2', suit: 'ouros' });
@@ -62,7 +59,7 @@ export function ViraDemo() {
 
   return (
     <div className="mx-auto w-full max-w-md">
-      <div className="relative h-[340px] sm:h-[400px]" aria-hidden="false">
+      <div className="relative h-[340px] overflow-hidden rounded-[2rem] sm:h-[400px]">
         {/* Mesa */}
         <div
           aria-hidden
@@ -75,7 +72,7 @@ export function ViraDemo() {
           type="button"
           onClick={turn}
           aria-label="Virar nova carta do monte para ver as manilhas mudarem"
-          className="group absolute left-[8%] top-[12%] cursor-pointer rounded-2xl"
+          className="group absolute left-[7%] top-[10%] z-40 cursor-pointer rounded-2xl"
         >
           <span aria-hidden className="absolute -left-1.5 -top-1.5 block h-28 w-20 -rotate-12 rounded-xl border border-[#9b1c1c] bg-[#7f1d1d] shadow-card transition group-hover:-rotate-[15deg]" />
           <span aria-hidden className="absolute -left-0.5 -top-0.5 block h-28 w-20 -rotate-6 rounded-xl border border-[#9b1c1c] bg-[#8a1f1f] shadow-card transition group-hover:-rotate-[8deg]" />
@@ -114,25 +111,21 @@ export function ViraDemo() {
           </span>
         </button>
 
-        {/* Manilhas da vez: calculadas pelo motor do jogo */}
-        <div aria-hidden className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2">
-          <div key={`fan-${flips}`} className="relative">
-            <DemoCard
-              rank={manilha}
-              suit="espadas"
-              className="absolute z-10 -translate-x-[92%] translate-y-3 -rotate-[14deg] animate-pop-in"
-            />
-            <DemoCard
-              rank={manilha}
-              suit="copas"
-              className="absolute z-20 -translate-x-1/2 -translate-y-4 animate-pop-in [animation-delay:60ms] [animation-fill-mode:backwards]"
-            />
-            <DemoCard
-              rank={manilha}
-              suit="paus"
-              zap
-              className="absolute z-30 -translate-x-[8%] translate-y-3 rotate-[14deg] animate-pop-in [animation-delay:120ms] [animation-fill-mode:backwards]"
-            />
+        {/* Manilhas da vez: leque contido numa caixa de tamanho fixo, sempre
+            dentro da mesa — nada vaza sobre o texto */}
+        <div aria-hidden className="absolute inset-x-0 bottom-4 flex justify-center sm:bottom-6">
+          <div className="relative h-[176px] w-[290px] sm:h-[224px] sm:w-[360px]">
+            {FAN_SLOTS.map((slot) => (
+              <div key={slot.suit} className={`absolute ${slot.pos} ${slot.rot} ${slot.z}`}>
+                <div
+                  key={`${slot.suit}-${flips}`}
+                  className="animate-pop-in [animation-fill-mode:backwards]"
+                  style={{ animationDelay: slot.delay }}
+                >
+                  <DemoCard rank={manilha} suit={slot.suit} zap={slot.suit === 'paus'} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
