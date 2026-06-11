@@ -1,52 +1,22 @@
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
-
-/** Carta decorativa (estática, só visual). */
-function HeroCard({
-  rank,
-  suit,
-  red = false,
-  className = '',
-  label,
-  small = false,
-}: {
-  rank: string;
-  suit: string;
-  red?: boolean;
-  className?: string;
-  label?: string;
-  small?: boolean;
-}) {
-  const size = small ? 'h-28 w-20 rounded-xl' : 'h-40 w-28 rounded-2xl sm:h-52 sm:w-36';
-  return (
-    <div
-      className={`absolute flex flex-col items-center justify-center border border-zinc-200
-        bg-gradient-to-br from-white via-zinc-50 to-zinc-200 font-display shadow-[0_20px_50px_rgba(0,0,0,0.55)]
-        ${size} ${red ? 'text-red-600' : 'text-zinc-900'} ${className}`}
-    >
-      <span className={`absolute left-2.5 top-1.5 font-bold ${small ? 'text-base' : 'text-xl sm:text-2xl'}`}>
-        {rank}
-      </span>
-      <span className={`${small ? 'text-4xl' : 'text-6xl sm:text-7xl'} drop-shadow-sm`}>{suit}</span>
-      <span
-        className={`absolute bottom-1.5 right-2.5 rotate-180 font-bold ${small ? 'text-base' : 'text-xl sm:text-2xl'}`}
-      >
-        {rank}
-      </span>
-      {label && (
-        <span className="absolute -bottom-9 whitespace-nowrap rounded-full border border-gold/50 bg-black/80 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-gold shadow-lg backdrop-blur">
-          {label}
-        </span>
-      )}
-    </div>
-  );
-}
+import { ViraDemo } from '@/components/ViraDemo';
+import {
+  IconLink,
+  IconMessageCircle,
+  IconShieldCheck,
+  IconSmartphone,
+  IconTrophy,
+  IconUser,
+  IconUsers,
+  IconZap,
+} from '@/components/icons';
 
 const MODES = [
-  { icon: '⚔️', title: '1 x 1', text: 'Mano a mano. Só você, três cartas e a coragem de pedir seis sem nada na mão.' },
-  { icon: '🤝', title: '2 x 2', text: 'Em dupla, como manda a tradição. O sinal pro parceiro fica por conta do chat.' },
-  { icon: '🏆', title: 'Ranqueada', text: 'Rating, temporadas e ranking global, semanal e mensal. Prove que a mesa é sua.' },
-  { icon: '🔗', title: 'Entre amigos', text: 'Mesa privada com link de convite: quem clicar cai sentado na sua mesa.' },
+  { Icon: IconUser, title: '1 x 1', text: 'Mano a mano. Só você, três cartas e a coragem de pedir seis sem nada na mão.' },
+  { Icon: IconUsers, title: '2 x 2', text: 'Em dupla, como manda a tradição. O sinal pro parceiro fica por conta do chat.' },
+  { Icon: IconTrophy, title: 'Ranqueada', text: 'Rating, temporadas e ranking global, semanal e mensal. Prove que a mesa é sua.' },
+  { Icon: IconLink, title: 'Entre amigos', text: 'Mesa privada com link de convite: quem clicar cai sentado na sua mesa.' },
 ];
 
 const STEPS = [
@@ -57,22 +27,22 @@ const STEPS = [
 
 const FEATURES = [
   {
-    icon: '⚡',
+    Icon: IconZap,
     title: 'Tempo real de verdade',
     text: 'Arraste a carta e ela bate na mesa de todo mundo no mesmo instante. Caiu a conexão? Você tem 60 segundos para voltar e o jogo continua de onde parou.',
   },
   {
-    icon: '🛡️',
+    Icon: IconShieldCheck,
     title: 'Jogo limpo, sempre',
     text: 'Suas cartas vivem no servidor — ninguém enxerga a sua mão, nem com programa modificado. Toda partida fica registrada lance a lance.',
   },
   {
-    icon: '💬',
+    Icon: IconMessageCircle,
     title: 'Mesa com zoeira',
     text: 'Chat e emojis rápidos durante a partida, com som de carta batendo e buzina de truco. O deboche faz parte do jogo.',
   },
   {
-    icon: '📱',
+    Icon: IconSmartphone,
     title: 'Joga em qualquer tela',
     text: 'No navegador do PC, tablet ou celular, com cartas que você arrasta com o dedo — e em breve nos aplicativos para Android e iOS.',
   },
@@ -134,34 +104,14 @@ export default function LandingPage() {
                 Já tenho conta
               </Link>
             </div>
-            <p className="mt-6 text-sm tracking-wide text-zinc-500">
+            <p className="mt-6 text-sm tracking-wide text-zinc-400">
               grátis · direto no navegador · sem instalar nada
             </p>
           </div>
 
-          {/* A mesa: a vira no monte e as manilhas da vez — a cena fala por si */}
-          <div className="relative mx-auto h-[340px] w-full max-w-md sm:h-[400px]" aria-hidden>
-            <div className="table-felt absolute inset-x-0 bottom-0 top-10 rounded-[50%] border-[10px] border-wood shadow-table" />
-            <div className="absolute inset-x-4 bottom-4 top-14 rounded-[50%] border border-gold/15" />
-
-            <div className="absolute left-[8%] top-[12%] animate-float-soft">
-              <div className="relative">
-                <div className="absolute -left-1.5 -top-1.5 h-28 w-20 -rotate-12 rounded-xl border border-[#9b1c1c] bg-[#7f1d1d] shadow-card" />
-                <div className="absolute -left-0.5 -top-0.5 h-28 w-20 -rotate-6 rounded-xl border border-[#9b1c1c] bg-[#8a1f1f] shadow-card" />
-                <HeroCard rank="2" suit="♦" red small className="relative !left-0 !top-0 rotate-3" />
-              </div>
-            </div>
-
-            <div className="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2">
-              <HeroCard rank="3" suit="♠" className="z-10 -translate-x-[92%] translate-y-3 -rotate-[14deg]" />
-              <HeroCard rank="3" suit="♥" red className="z-20 -translate-x-1/2 -translate-y-4" />
-              <HeroCard
-                rank="3"
-                suit="♣"
-                className="z-30 -translate-x-[8%] translate-y-3 rotate-[14deg] ring-1 ring-gold shadow-glow"
-              />
-            </div>
-          </div>
+          {/* A regra central do Paulista, viva: toque no monte e o motor do jogo
+              recalcula as manilhas na hora */}
+          <ViraDemo />
         </section>
 
         {/* ===================== FAIXA DE GRITOS (marquee) ===================== */}
@@ -221,7 +171,7 @@ export default function LandingPage() {
                   className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/25 p-7 backdrop-blur transition duration-300 hover:-translate-y-1.5 hover:border-gold/40"
                 >
                   <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/0 to-transparent transition duration-300 group-hover:via-gold/70" />
-                  <span className="inline-block text-3xl transition duration-300 group-hover:scale-110">{m.icon}</span>
+                  <m.Icon className="h-8 w-8 text-gold/80 transition-colors duration-300 group-hover:text-gold" />
                   <h3 className="mt-4 font-display text-2xl text-gold">{m.title}</h3>
                   <p className="mt-2.5 text-[15px] leading-relaxed text-zinc-400">{m.text}</p>
                 </div>
@@ -237,8 +187,8 @@ export default function LandingPage() {
           <div className="mx-auto grid max-w-5xl gap-x-12 gap-y-10 px-4 sm:grid-cols-2">
             {FEATURES.map((f) => (
               <div key={f.title} className="flex gap-5">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-black/40 text-xl backdrop-blur">
-                  {f.icon}
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-gold/40 bg-black/40 backdrop-blur">
+                  <f.Icon className="h-5 w-5 text-gold" />
                 </span>
                 <div>
                   <h3 className="font-display text-xl text-zinc-100">{f.title}</h3>
