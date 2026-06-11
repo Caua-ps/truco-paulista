@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CardBack, PlayingCard, ViraFlip } from '@/components/PlayingCard';
+import { IconMessageCircle, IconSend, IconVolume, IconVolumeOff } from '@/components/icons';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { useSocial } from '@/lib/social-store';
@@ -405,7 +406,12 @@ export default function MesaPage() {
       {/* ============================ BARRA SUPERIOR ============================ */}
       <header className="relative z-30 flex items-center justify-between gap-2 px-3 py-2.5 sm:px-5">
         <div className="glass flex items-center gap-2 px-3 py-1.5 text-sm">
-          <button onClick={leave} className="text-zinc-400 transition hover:text-red-400" title="Sair da mesa">
+          <button
+            onClick={leave}
+            className="px-2 py-1.5 text-zinc-400 transition hover:text-red-400"
+            title="Sair da mesa"
+            aria-label="Sair da mesa"
+          >
             ←
           </button>
           <button
@@ -444,18 +450,24 @@ export default function MesaPage() {
         )}
 
         <div className="flex items-center gap-2">
-          <button onClick={toggleSound} className="glass px-3 py-1.5 text-lg" title={soundOff ? 'Ativar som' : 'Silenciar'}>
-            {soundOff ? '🔇' : '🔊'}
+          <button
+            onClick={toggleSound}
+            className="glass flex h-11 w-11 items-center justify-center text-zinc-300 transition hover:text-gold"
+            title={soundOff ? 'Ativar som' : 'Silenciar'}
+            aria-label={soundOff ? 'Ativar som' : 'Silenciar som'}
+          >
+            {soundOff ? <IconVolumeOff className="h-5 w-5" /> : <IconVolume className="h-5 w-5" />}
           </button>
           <button
             onClick={() => {
               setChatOpen((o) => !o);
               setUnread(0);
             }}
-            className="glass relative px-3 py-1.5 text-lg lg:hidden"
+            className="glass relative flex h-11 w-11 items-center justify-center text-zinc-300 transition hover:text-gold lg:hidden"
             title="Chat"
+            aria-label={`Abrir chat${unread > 0 ? ` (${unread} mensagens novas)` : ''}`}
           >
-            💬
+            <IconMessageCircle className="h-5 w-5" />
             {unread > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
                 {unread}
@@ -878,8 +890,14 @@ export default function MesaPage() {
             ${chatOpen ? 'translate-y-0' : 'translate-y-full'}`}
         >
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-            <h3 className="font-bold text-zinc-300">💬 Mesa</h3>
-            <button onClick={() => setChatOpen(false)} className="text-zinc-500 hover:text-zinc-300 lg:hidden">
+            <h3 className="flex items-center gap-2 font-bold text-zinc-300">
+              <IconMessageCircle className="h-4 w-4" /> Mesa
+            </h3>
+            <button
+              onClick={() => setChatOpen(false)}
+              className="flex h-9 w-9 items-center justify-center text-zinc-500 hover:text-zinc-300 lg:hidden"
+              aria-label="Fechar chat"
+            >
               ✕
             </button>
           </div>
@@ -893,12 +911,13 @@ export default function MesaPage() {
             ))}
             <div ref={chatEndRef} />
           </div>
-          <div className="flex justify-around px-3 pb-1.5">
+          <div className="flex justify-around px-2 pb-1">
             {QUICK_EMOJIS.map((e) => (
               <button
                 key={e}
                 onClick={() => getGameSocket().emit('emoji:send', { emoji: e })}
-                className="rounded-lg p-1 text-xl transition hover:scale-125 hover:bg-white/10"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-xl transition hover:bg-white/10"
+                aria-label={`Enviar reação ${e}`}
               >
                 {e}
               </button>
@@ -906,13 +925,16 @@ export default function MesaPage() {
           </div>
           <form onSubmit={sendChat} className="flex gap-2 border-t border-white/10 p-3">
             <input
-              className="input flex-1 py-1.5"
+              className="input min-h-11 flex-1 py-1.5"
               placeholder="Mensagem…"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               maxLength={200}
+              aria-label="Mensagem para a mesa"
             />
-            <button className="btn-primary px-3 py-1.5">➤</button>
+            <button className="btn-primary min-h-11 px-4" aria-label="Enviar mensagem">
+              <IconSend className="h-4 w-4" />
+            </button>
           </form>
         </aside>
       </div>
