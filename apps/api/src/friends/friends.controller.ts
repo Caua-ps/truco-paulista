@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { IsBoolean, IsString } from 'class-validator';
@@ -54,5 +55,21 @@ export class FriendsController {
   @Delete(':friendId')
   remove(@CurrentUser() user: AuthenticatedUser, @Param('friendId') friendId: string) {
     return this.friends.remove(user.id, friendId);
+  }
+
+  /** Contadores de mensagens não lidas, por amigo. */
+  @Get('messages/unread')
+  unread(@CurrentUser() user: AuthenticatedUser) {
+    return this.friends.unreadCounts(user.id);
+  }
+
+  /** Histórico da conversa com um amigo (marca como lidas). */
+  @Get(':friendId/messages')
+  messages(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('friendId') friendId: string,
+    @Query('before') before?: string,
+  ) {
+    return this.friends.getMessages(user.id, friendId, before);
   }
 }
