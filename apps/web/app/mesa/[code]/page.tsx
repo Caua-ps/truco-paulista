@@ -3,7 +3,9 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CardBack, PlayingCard, ViraFlip } from '@/components/PlayingCard';
+import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
+import { useSocial } from '@/lib/social-store';
 import { getGameSocket } from '@/lib/socket';
 import { isMuted, setMuted, sfx } from '@/lib/sound';
 import {
@@ -113,6 +115,10 @@ export default function MesaPage() {
   /** Relógio da decisão corrente (timer de turno do servidor). */
   const [turnInfo, setTurnInfo] = useState<{ seat: number; deadline: number } | null>(null);
   const [now, setNow] = useState(() => Date.now());
+  /** Amigos online para convite direto (pré-jogo). */
+  const [onlineFriends, setOnlineFriends] = useState<{ id: string; displayName: string }[]>([]);
+  const [invited, setInvited] = useState<Set<string>>(new Set());
+  const setNotice = useSocial((s) => s.setNotice);
   const dropRef = useRef<HTMLDivElement>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -223,6 +229,29 @@ export default function MesaPage() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [turnInfo]);
+
+  // Pré-jogo: carrega amigos online para o convite direto.
+  useEffect(() => {
+    if (!room || room.started) return;
+    api<{ id: string; displayName: string; online: boolean }[]>('/friends')
+      .then((all) => setOnlineFriends(all.filter((f) => f.online)))
+      .catch(() => undefined);
+  }, [room?.started, room?.players.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const inviteFriend = (friendId: string, name: string) => {
+    getGameSocket().emit(
+      'invite:send',
+      { toUserId: friendId },
+      (res: { ok: boolean; error?: string }) => {
+        if (res?.ok) {
+          setInvited((s) => new Set([...s, friendId]));
+          setNotice(`Convite enviado para ${name}! 🃏`);
+        } else {
+          setNotice(res?.error ?? 'Falha ao convidar');
+        }
+      },
+    );
+  };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -465,6 +494,30 @@ export default function MesaPage() {
                   <p className="mt-2 text-sm text-zinc-200/60">
                     mande o link — quem abrir cai direto nesta mesa
                   </p>
+
+                  {/* Convite direto para amigos online */}
+                  {onlineFriends.filter((f) => !room?.players.some((p) => p.userId === f.id)).length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">
+                        amigos online
+                      </p>
+                      <div className="mt-2 flex flex-wrap justify-center gap-2">
+                        {onlineFriends
+                          .filter((f) => !room?.players.some((p) => p.userId === f.id))
+                          .slice(0, 6)
+                          .map((f) => (
+                            <button
+                              key={f.id}
+                              onClick={() => inviteFriend(f.id, f.displayName)}
+                              disabled={invited.has(f.id)}
+                              className="btn-secondary px-3 py-1.5 text-sm"
+                            >
+                              {invited.has(f.id) ? `${f.displayName} ✓` : `+ ${f.displayName}`}
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid w-full max-w-sm gap-2">
