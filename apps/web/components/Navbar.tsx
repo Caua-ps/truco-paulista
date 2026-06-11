@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
+import { useSocial } from '@/lib/social-store';
 import { disconnectGameSocket } from '@/lib/socket';
 
 export function Navbar() {
   const { user, clear } = useAuth();
+  const unreadTotal = useSocial((s) => Object.values(s.unread).reduce((a, b) => a + b, 0));
   const router = useRouter();
 
   const logout = () => {
@@ -31,9 +33,14 @@ export function Navbar() {
             <>
               <Link
                 href="/amigos"
-                className="hidden rounded-full px-3 py-1.5 text-zinc-400 transition hover:bg-white/5 hover:text-gold sm:block"
+                className="relative hidden rounded-full px-3 py-1.5 text-zinc-400 transition hover:bg-white/5 hover:text-gold sm:block"
               >
                 Amigos
+                {unreadTotal > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    {unreadTotal > 9 ? '9+' : unreadTotal}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/ranking"
