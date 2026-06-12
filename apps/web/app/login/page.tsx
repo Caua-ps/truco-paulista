@@ -41,7 +41,7 @@ function LoginForm() {
       <h1 className="font-display text-3xl text-zinc-50">Entrar</h1>
       {next && (
         <p className="mt-2 rounded-xl bg-gold/10 px-3 py-2 text-sm text-gold">
-          🃏 Você foi convidado para uma mesa — entre para sentar.
+          🃏 Você foi convidado para uma mesa. Entre para sentar.
         </p>
       )}
       <form onSubmit={submit} className="mt-6 space-y-4">

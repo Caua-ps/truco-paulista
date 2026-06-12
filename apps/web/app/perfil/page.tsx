@@ -75,7 +75,7 @@ export default function PerfilPage() {
             <p className="text-zinc-400">@{me.username}</p>
             {!me.emailVerified && (
               <p className="mt-1 text-sm text-amber-400">
-                ⚠ E-mail não verificado — confira sua caixa de entrada.
+                ⚠ E-mail não verificado. Confira sua caixa de entrada.
               </p>
             )}
           </div>

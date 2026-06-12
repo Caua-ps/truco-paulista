@@ -142,8 +142,8 @@ export function ViraDemo() {
           onClick={turn}
           className="cursor-pointer rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 transition hover:border-gold/40 hover:text-gold"
         >
-          ↻ toque no monte — virou <b className="text-zinc-200">{vira.rank}{SUIT_SYMBOL[vira.suit]}</b>,
-          manilha é <b className="text-gold">{manilha}</b>
+          ↻ virou <b className="text-zinc-200">{vira.rank}{SUIT_SYMBOL[vira.suit]}</b>, manilha é{' '}
+          <b className="text-gold">{manilha}</b>. Toca no monte pra virar de novo
         </button>
       </p>
     </div>

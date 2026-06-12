@@ -51,7 +51,7 @@ export default function RankingPage() {
           {rows === null ? (
             <p className="p-6 text-zinc-400">Carregando…</p>
           ) : rows.length === 0 ? (
-            <p className="p-6 text-zinc-400">Sem dados ainda — jogue a primeira partida!</p>
+            <p className="p-6 text-zinc-400">Ninguém pontuou ainda. Joga a primeira que o topo é seu!</p>
           ) : (
             <table className="w-full text-left">
               <thead className="bg-black/40 text-sm text-zinc-400">

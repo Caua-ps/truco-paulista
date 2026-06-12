@@ -161,7 +161,7 @@ export default function MesaPage() {
           sfx.truco();
         }
         if (ev.type === 'TRUCO_ACCEPTED') {
-          setBanner(`Aceito — valendo ${ev.stake}!`);
+          setBanner(`Aceito! Valendo ${ev.stake}`);
           sfx.accept();
         }
         if (ev.type === 'TRUCO_RUN') {
@@ -176,7 +176,7 @@ export default function MesaPage() {
               ? `+${ev.summary.pointsAwarded} pra nós! 🎉`
               : `+${ev.summary.pointsAwarded} pra eles 😬`,
           );
-        if (ev.type === 'MAO_DE_ONZE_ACCEPTED') setBanner('Mão de onze aceita — valendo 3!');
+        if (ev.type === 'MAO_DE_ONZE_ACCEPTED') setBanner('Mão de onze aceita, valendo 3!');
         if (ev.type === 'GAME_ENDED') {
           setBanner(null);
           if (ev.winnerTeam === us) sfx.win();
@@ -195,7 +195,7 @@ export default function MesaPage() {
       setTimeout(() => setEmojis((list) => list.filter((e) => e.id !== id)), 1800);
       sfx.pop();
     };
-    const onPlayerDisconnected = () => setBanner('Jogador caiu — 60s para voltar ⏳');
+    const onPlayerDisconnected = () => setBanner('Jogador caiu. 60s pra voltar ⏳');
     const onTurnDeadline = (info: { seat: number; deadline: number }) => setTurnInfo(info);
     const onTurnTimeout = () => setBanner('Tempo esgotado! ⏰');
 
@@ -504,7 +504,7 @@ export default function MesaPage() {
                     </button>
                   </div>
                   <p className="mt-2 text-sm text-zinc-200/60">
-                    mande o link — quem abrir cai direto nesta mesa
+                    mande o link, quem abrir cai direto nesta mesa
                   </p>
 
                   {/* Convite direto para amigos online */}
@@ -642,7 +642,7 @@ export default function MesaPage() {
                   >
                     {drag?.moved && (
                       <span className="absolute inset-0 flex items-center justify-center text-center font-display text-lg italic text-gold/80">
-                        {overZone ? (coverMode ? 'solta — vai coberta 🂠' : 'solta!') : 'arrasta até aqui'}
+                        {overZone ? (coverMode ? 'solta, vai coberta 🂠' : 'solta!') : 'arrasta até aqui'}
                       </span>
                     )}
                   </div>
@@ -735,7 +735,7 @@ export default function MesaPage() {
                           secondsLeft !== null && secondsLeft <= 10 ? 'text-red-400' : 'text-gold'
                         }`}
                       >
-                        {coverMode ? 'sua vez — ela cai virada 🂠' : 'sua vez 👆'}
+                        {coverMode ? 'sua vez, ela cai virada 🂠' : 'sua vez 👆'}
                         {clock}
                       </span>
                     )}

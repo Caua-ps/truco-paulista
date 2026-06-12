@@ -267,7 +267,7 @@ export default function AmigosPage() {
               {friends?.length === 0 && (
                 <div className="panel text-center text-zinc-400">
                   <p className="text-3xl">🪑</p>
-                  <p className="mt-2">Mesa vazia — adicione amigos pelo nome de usuário acima.</p>
+                  <p className="mt-2">Mesa vazia por enquanto. Adicione amigos pelo nome de usuário aí em cima.</p>
                 </div>
               )}
               {friends?.map((f) => (
@@ -351,7 +351,7 @@ export default function AmigosPage() {
                 <div className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
                   {thread.length === 0 && (
                     <p className="pt-8 text-center text-sm text-zinc-600">
-                      Começo de conversa — manda um “bora trucar?” 🎙️
+                      Conversa nova. Manda um “bora trucar?” 🎙️
                     </p>
                   )}
                   {thread.map((m) => {
