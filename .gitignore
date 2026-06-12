@@ -13,6 +13,8 @@ coverage/
 apps/api/prisma/migrations/dev/
 
 # Ferramentas locais
+.agents/
+skills-lock.json
 
 # OS / editor
 .DS_Store
