@@ -65,13 +65,13 @@ export default function LojaPage() {
       <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-3xl font-black">🛍️ Loja</h1>
         <p className="mt-1 text-zinc-400">
-          Tudo aqui é cosmético — <b>nada</b> dá vantagem em jogo.
+          Tudo aqui é cosmético. <b>Nada</b> dá vantagem em jogo.
         </p>
         {message && <p className="mt-4 rounded-xl bg-black/40 p-3">{message}</p>}
 
         {/* Premium */}
         <section className="panel mt-8 border-gold/40">
-          <h2 className="text-xl font-bold text-gold">★ Premium — jogue sem anúncios</h2>
+          <h2 className="text-xl font-bold text-gold">★ Premium, zero anúncios</h2>
           <ul className="mt-2 list-inside list-disc text-sm text-zinc-300">
             <li>Zero anúncios, em qualquer situação</li>
             <li>Selo ★ no perfil</li>

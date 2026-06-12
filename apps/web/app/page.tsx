@@ -20,7 +20,7 @@ const MODES = [
 ];
 
 const STEPS = [
-  { n: 'I', title: 'Crie sua conta', text: 'Leva 30 segundos — ou entre direto com o Google.' },
+  { n: 'I', title: 'Crie sua conta', text: 'Leva 30 segundos, ou entre direto com o Google.' },
   { n: 'II', title: 'Escolha a mesa', text: 'Matchmaking automático ou mesa privada com link pros amigos.' },
   { n: 'III', title: 'Grite truco', text: 'Vira na mesa, manilha definida, melhor de três valendo 12.' },
 ];
@@ -34,7 +34,7 @@ const FEATURES = [
   {
     Icon: IconShieldCheck,
     title: 'Jogo limpo, sempre',
-    text: 'Suas cartas vivem no servidor — ninguém enxerga a sua mão, nem com programa modificado. Toda partida fica registrada lance a lance.',
+    text: 'Suas cartas ficam no servidor e ninguém enxerga a sua mão, nem com programa modificado. Toda partida fica registrada lance a lance.',
   },
   {
     Icon: IconMessageCircle,
@@ -44,7 +44,7 @@ const FEATURES = [
   {
     Icon: IconSmartphone,
     title: 'Joga em qualquer tela',
-    text: 'No navegador do PC, tablet ou celular, com cartas que você arrasta com o dedo — e em breve nos aplicativos para Android e iOS.',
+    text: 'No navegador do PC, tablet ou celular, com cartas que você arrasta com o dedo. Em breve também nos aplicativos para Android e iOS.',
   },
 ];
 
@@ -90,7 +90,7 @@ export default function LandingPage() {
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-zinc-300 lg:mx-0">
               A vira sobe, a manilha muda, e o blefe é por sua conta. Partidas 1x1 e 2x2 em tempo
-              real, no navegador — desafie os amigos com um link ou enfrente o Brasil no
+              real, direto no navegador. Desafie os amigos com um link ou enfrente o Brasil no
               matchmaking.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
@@ -220,7 +220,7 @@ export default function LandingPage() {
         <footer className="border-t border-white/5 py-10 text-center">
           <p className="font-display text-xl tracking-[0.3em] text-gold/50">♠ ♥ ♣ ♦</p>
           <p className="mt-3 text-sm text-zinc-500">
-            Truco Paulista Online — feito com respeito às regras e ao deboche.
+            Truco Paulista Online, feito com respeito às regras e ao deboche.
           </p>
         </footer>
       </main>
