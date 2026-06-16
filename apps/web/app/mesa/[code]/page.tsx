@@ -300,7 +300,7 @@ export default function MesaPage() {
     setChatInput('');
   };
   const copy = (kind: 'code' | 'link') => {
-    const text = kind === 'code' ? code : `${window.location.origin}/mesa/${code}`;
+    const text = kind === 'code' ? code : `${window.location.origin}/convite/${code}`;
     navigator.clipboard?.writeText(text).then(() => {
       setCopied(kind);
       setTimeout(() => setCopied(null), 1500);

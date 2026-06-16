@@ -31,6 +31,9 @@ jobs:
       - name: Typecheck da API
         run: npm run typecheck --workspace=apps/api
 
+      - name: Testes e2e do gateway
+        run: npm run test --workspace=apps/api
+
       - name: Build da API
         run: npm run build --workspace=apps/api
 
