@@ -1,0 +1,36 @@
+# Deploy da API no Fly.io.
+#   fly launch --no-deploy        # cria o app a partir deste arquivo
+#   fly secrets set DATABASE_URL=... REDIS_URL=... JWT_SECRET=... JWT_REFRESH_SECRET=... WEB_ORIGIN=...
+#   fly deploy
+#
+# O container já roda `prisma migrate deploy` antes de subir (ver apps/api/Dockerfile),
+# então a migração inicial é aplicada no primeiro boot.
+app = "truco-api"
+primary_region = "gru" # São Paulo
+
+[build]
+  dockerfile = "Dockerfile"
+  # Contexto precisa ser a raiz do monorepo:
+  #   fly deploy --dockerfile apps/api/Dockerfile --build-context .
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3001"
+
+[http_service]
+  internal_port = 3001
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "15s"
+    timeout = "3s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

@@ -17,13 +17,16 @@
 
 ## Fase 1 — MVP jogável em produção (3–4 semanas)
 
-- [ ] Migração inicial do Prisma + deploy (Fly.io/Railway/Render para começar).
-- [ ] E-mail transacional real (Resend/SES) no `MailService`.
-- [ ] Telemetria mínima (Sentry + logs estruturados).
-- [ ] Polimento da mesa: animações de distribuição/recolhimento, sons.
-- [ ] Convite por link direto (`/mesa/CODIGO` já funciona; falta deep-link de convite com preview).
-- [ ] Testes e2e do gateway (vitest + socket.io-client).
-- [ ] Beta fechado com amigos; ajustar timeouts/UX de reconexão.
+- [x] Scaffolding de deploy: Dockerfile já roda `prisma migrate deploy` no boot,
+      `fly.toml` da API e `docs/DEPLOY.md`. (Deploy real é passo manual de ops.)
+- [x] E-mail transacional real no `MailService` (nodemailer/SMTP, templates HTML).
+- [x] Telemetria mínima: Sentry (`@sentry/node` + filtro global) e logs
+      estruturados (nestjs-pino). Health checks `/health` e `/ready`.
+- [x] Polimento da mesa: animações de distribuição/recolhimento e sons (WebAudio).
+- [x] Convite por link com preview: rota `/convite/CODIGO` com OG dinâmico
+      (`opengraph-image`) e prévia pública da sala (`GET /rooms/:code/preview`).
+- [x] Testes e2e do gateway (vitest + socket.io-client).
+- [ ] Beta fechado com amigos; ajustar timeouts/UX de reconexão. (Operacional.)
 
 ## Fase 2 — Social e retenção (4–6 semanas)
 
