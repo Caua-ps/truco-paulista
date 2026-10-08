@@ -1,86 +1,94 @@
 # 🃏 Truco Paulista Online
 
-Plataforma multiplayer de Truco Paulista em tempo real: Web hoje, mobile
-(React Native) amanhã — com a regra do jogo isolada em um pacote compartilhado.
+🇧🇷 [Leia em português](README.pt-BR.md)
 
-## Estrutura do monorepo
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![NestJS](https://img.shields.io/badge/NestJS-E0234E?logo=nestjs&logoColor=white)
+![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?logo=socketdotio&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)
+
+A real-time multiplayer platform for Truco Paulista, the Brazilian card game. It runs on the web today, with
+mobile (React Native) planned, and the game rules live in a separate shared package so every client uses the
+same engine.
+
+## Monorepo layout
 
 ```
 truco/
 ├── packages/
-│   └── game-core/      # Motor de regras (TS puro, 0 dependências, 23 testes)
+│   └── game-core/      # Rules engine (pure TS, zero dependencies, 23 tests)
 ├── apps/
 │   ├── api/            # NestJS: REST + WebSocket, Prisma, Redis, JWT/Google
 │   └── web/            # Next.js + Tailwind + PWA
 ├── docs/
-│   ├── ARCHITECTURE.md # Desenho geral e decisões
-│   ├── AUTH.md         # Fluxo de autenticação completo
-│   ├── SCALABILITY.md  # Plano de escala por gatilhos
-│   ├── MONETIZATION.md # Ads entre partidas, Premium, loja cosmética
-│   └── ROADMAP.md      # Fases 0–5
+│   ├── ARCHITECTURE.md # Overall design and decisions
+│   ├── AUTH.md         # Full authentication flow
+│   ├── SCALABILITY.md  # Trigger-based scaling plan
+│   ├── MONETIZATION.md # Ads between matches, Premium, cosmetic shop
+│   └── ROADMAP.md      # Phases 0–5
 ├── docker-compose.yml  # Postgres + Redis + API + Web
 └── .github/workflows/ci.yml
 ```
 
-## Rodando em desenvolvimento
+## Running in development
 
-Pré-requisitos: Node 20+, Docker (para Postgres/Redis).
+Requirements: Node 20+ and Docker (for Postgres/Redis).
 
 ```bash
-# 1. Dependências
+# 1. Dependencies
 npm install
 
-# 2. Infra local (Postgres + Redis)
+# 2. Local infrastructure (Postgres + Redis)
 docker compose up -d postgres redis
 
-# 3. Configuração da API
+# 3. API configuration
 cp apps/api/.env.example apps/api/.env
 
-# 4. Banco: migração inicial + seed
+# 4. Database: initial migration + seed
 npm run db:migrate            # prisma migrate dev
-node apps/api/prisma/seed.mjs # cosméticos e missões iniciais
+node apps/api/prisma/seed.mjs # initial cosmetics and missions
 
-# 5. Motor (a API consome o build)
+# 5. Engine (the API consumes the build)
 npm run build --workspace=packages/game-core
 
-# 6. Subir tudo (dois terminais)
+# 6. Start everything (two terminals)
 npm run dev --workspace=apps/api   # http://localhost:3001
 npm run dev --workspace=apps/web   # http://localhost:3000
 ```
 
-Para testar uma partida sozinho: abra duas janelas (uma anônima), crie duas
-contas, crie uma mesa 1x1 em uma janela e entre com o código na outra.
+To try a match on your own, open two windows (one private), create two accounts, create a 1v1 table in one
+window and join it with the room code from the other.
 
-## Testes e verificação
+## Tests and checks
 
 ```bash
-npm run test:core                        # regras do truco (vitest)
-npm run typecheck --workspace=apps/api   # typecheck do backend
-npm run build                            # build completo dos 3 pacotes
+npm run test:core                        # truco rules (vitest)
+npm run typecheck --workspace=apps/api   # backend type-check
+npm run build                            # full build of the 3 packages
 ```
 
-## Tudo em containers
+## Everything in containers
 
 ```bash
 docker compose up --build   # web :3000, api :3001
 ```
 
-## Funcionalidades implementadas
+## Features
 
-- **Jogo**: baralho de 40 cartas, vira/manilhas, melhor de 3 com todas as
-  regras de empate, truco→6→9→12 (aceitar/correr/aumentar), mão de onze,
-  mão de ferro, carta coberta, validação 100% server-side.
-- **Modos**: 1x1 e 2x2 · casual e ranqueada (Elo) · sala privada por código ·
-  matchmaking automático por rating.
-- **Tempo real**: Socket.IO autenticado, reconexão com retomada de partida,
-  W.O. após 60s, presença online, chat com rate limit, emojis rápidos.
-- **Conta**: cadastro/login, Google OAuth, verificação de e-mail, reset de
-  senha, refresh com rotação, perfil público, XP/nível, histórico, replay (API).
-- **Plataforma**: ranking global/semanal/mensal com cache, amigos (API),
-  loja cosmética, Premium (sem pay-to-win), painel admin (API), denúncias,
-  logs de auditoria.
+- **Game**: 40-card deck, *vira*/*manilhas*, best of three with every tie rule, truco → 6 → 9 → 12
+  (accept / fold / raise), *mão de onze*, *mão de ferro*, face-down card, all moves validated server-side.
+- **Modes**: 1v1 and 2v2 · casual and ranked (Elo) · private rooms by code · automatic rating-based matchmaking.
+- **Real time**: authenticated Socket.IO, reconnection with match resumption, forfeit after 60 s, online presence,
+  rate-limited chat, quick emojis.
+- **Accounts**: sign-up/login, Google OAuth, email verification, password reset, refresh-token rotation, public
+  profile, XP/levels, match history, replays (API).
+- **Platform**: global/weekly/monthly leaderboards with caching, friends (API), cosmetic shop, Premium (no
+  pay-to-win), admin panel (API), player reports, audit logs.
 
-## Variáveis de ambiente
+## Environment variables
 
-Veja [apps/api/.env.example](apps/api/.env.example). No frontend:
-`NEXT_PUBLIC_API_URL` e `NEXT_PUBLIC_WS_URL` (padrão `http://localhost:3001`).
+See [apps/api/.env.example](apps/api/.env.example). Frontend: `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WS_URL`
+(default `http://localhost:3001`).
